@@ -2,7 +2,7 @@
 docker build -t hustcw/ctf_ubuntu_1804 - <<DOCKERFILE_EOF || exit 1
 from ubuntu:18.04
 run rm /etc/dpkg/dpkg.cfg.d/excludes
-run sed -i 's/archive.ubuntu.com/mirrors.bfsu.edu.cn/g' /etc/apt/sources.list \
+run sed -i 's/archive.ubuntu.com/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list \
     && sed -i 's/# deb-src/deb-src/g' /etc/apt/sources.list
 
 run dpkg --add-architecture i386 && apt update && apt full-upgrade -y && apt clean
@@ -73,7 +73,20 @@ run sh -c "\$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/to
     git clone https://github.com/zsh-users/zsh-completions ~/.oh-my-zsh/custom/plugins/zsh-completions && \
     git clone https://github.com/zsh-users/zsh-syntax-highlighting ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting && \
     curl https://raw.githubusercontent.com/wklken/vim-for-server/master/vimrc > ~/.vimrc 
-    
+
+run git clone https://github.com/Hustcw/glibc-all-in-one.git
+workdir /home/ctf/glibc-all-in-one
+run chmod +x ./setup.sh && sh -c ./setup.sh
+run sudo mkdir /glibc && sudo cp -r /home/ctf/glibc-all-in-one/libs/* /glibc/
+
+workdir /home/ctf
+run git clone https://github.com/Hustcw/patchelf.git 
+workdir /home/ctf/patchelf
+run sudo apt install -y autoconf automake libtool
+run ./bootstrap.sh && ./configure && make && make check && sudo make install
+
+workdir /home/ctf
+run curl https://raw.githubusercontent.com/Hustcw/ctf-docker/master/tmux.conf > ~/.tmux.conf 
 run mkdir mount
 workdir /home/ctf/mount
 
